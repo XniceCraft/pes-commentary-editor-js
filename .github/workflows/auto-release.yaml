@@ -1,4 +1,5 @@
-name: Auto Release
+# .github/workflows/release.yml
+name: Create Release
 
 on:
   push:
@@ -20,7 +21,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -32,7 +33,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Get version from package.json
         id: package_version
@@ -50,11 +51,43 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Git tag
+      - name: Configure Git
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create or update release branch
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          # Check if release branch exists
+          if git ls-remote --heads origin release | grep -q release; then
+            # Release branch exists, check it out
+            git fetch origin release
+            git checkout release
+            git merge origin/master --no-edit -X theirs || true
+          else
+            # Release branch doesn't exist, create it
+            git checkout -b release
+          fi
+          
+          # Add built files
+          git add -f dist/
+          
+          # Commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "build: release v${{ steps.package_version.outputs.version }}"
+          fi
+          
+          # Push release branch
+          git push origin release
+
+      - name: Create Git tag on release branch
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git checkout release
           git tag -a "v${{ steps.package_version.outputs.version }}" -m "Release v${{ steps.package_version.outputs.version }}"
           git push origin "v${{ steps.package_version.outputs.version }}"
 
@@ -67,8 +100,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          files: |
-            dist/**/*
+          target_commitish: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
