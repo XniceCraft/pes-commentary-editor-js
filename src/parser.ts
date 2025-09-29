@@ -1,11 +1,16 @@
 import {
-  cleanString,
+  readString,
   decimalToBytes,
   isBinaryValid,
   sortAndCountPlayers,
+  formatTo6String,
 } from "./utils.js";
 import type { PESConfig } from "./parser_config.js";
-import type { CommentaryMetadata, CommentaryRecord } from "./types.js";
+import type {
+  CommentaryMetadata,
+  CommentaryRecord,
+  CommentaryUpsert,
+} from "./types.js";
 
 const textEncoder = new TextEncoder();
 
@@ -34,53 +39,69 @@ export class PESCommentaryListParser {
     this.playerList = playerList;
   }
 
-   /**
-   * Create a player
-   * @param commentaryId - Commentary identifier (e.g., '57123')
-   * @param playerName - Display name for the player
+  /**
+   * Creates a new player in the commentary list
+   * @param data - Object containing commentaryId and playerName
+   * @throws {Error} If commentary ID already exists
    * @example
-   * parser.createPlayer('57123', 'Mohamed Salah');
+   * parser.createPlayer({ commentaryId: 57123, playerName: 'Mohamed Salah' });
    */
-  createPlayer(commentaryId: string, playerName: string) {
-    const commentaryName = `${this.pesConfig.COMMENTARY_PREFIX}${commentaryId}`;
+  createPlayer(data: CommentaryUpsert) {
+    if (!data.playerName?.trim()) {
+      throw new Error("Player name cannot be empty");
+    }
+    if (data.commentaryId < 0 || data.commentaryId > 999999) {
+      throw new Error("Commentary ID must be between 0 and 999999");
+    }
+
+    const commentaryName = this.buildCommentaryName(data.commentaryId);
+    const index = this.playerList.findIndex(
+      (player) => player.commentaryName === commentaryName,
+    );
+    if (index !== -1)
+      throw new Error(
+        `Commentary for id ${formatTo6String(
+          data.commentaryId,
+        )} already exists`,
+      );
+
     this.playerList.push({
-      commentaryName,
-      playerName,
+      commentaryName: commentaryName,
+      playerName: data.playerName,
     });
   }
 
   /**
    * Updates a player's display name
-   * @param commentaryName - Commentary identifier to update (e.g., 'EN_A1_P0_R57123')
-   * @param playerName - New display name for the player
-   * @throws {Error} If player with given commentary name is not found
+   * @param data - Object containing commentaryId and new playerName
+   * @throws {Error} If player with given commentary ID is not found
    * @example
-   * parser.updatePlayer('EN_A1_P0_R57123', 'Mohamed Salah');
+   * parser.updatePlayer({ commentaryId: 57123, playerName: 'Mohamed Salah' });
    */
-  updatePlayer(commentaryName: string, playerName: string) {
+  updatePlayer(data: CommentaryUpsert) {
+    const commentaryName = this.buildCommentaryName(data.commentaryId);
     const index = this.playerList.findIndex(
       (player) => player.commentaryName === commentaryName,
     );
 
-    if (index === -1) {
+    if (index === -1)
       throw new Error(
         `Player with commentary name "${commentaryName}" not found`,
       );
-    }
 
-    if (this.playerList[index]) {
-      this.playerList[index].playerName = playerName;
-    }
+    if (this.playerList[index])
+      this.playerList[index].playerName = data.playerName;
   }
 
   /**
    * Removes a player from the commentary list
-   * @param commentaryName - Commentary identifier to delete
-   * @throws {Error} If player with given commentary name is not found
+   * @param commentaryId - Commentary ID to delete (e.g., 57123)
+   * @throws {Error} If player with given commentary ID is not found
    * @example
-   * parser.deletePlayer('EN_A1_P0_R57123');
+   * parser.deletePlayer(57123);
    */
-  deletePlayer(commentaryName: string) {
+  deletePlayer(commentaryId: CommentaryUpsert["commentaryId"]) {
+    const commentaryName = this.buildCommentaryName(commentaryId);
     const index = this.playerList.findIndex(
       (player) => player.commentaryName === commentaryName,
     );
@@ -106,7 +127,7 @@ export class PESCommentaryListParser {
    * const blob = new Blob([binary], { type: 'application/octet-stream' });
    * // Download or save the blob
    */
-  save() {
+  save(): ArrayBuffer {
     const buffer = new ArrayBuffer(
       this.pesConfig.COMMENTARY_START_OFFSET +
         this.playerList.length * this.pesConfig.RECORD_SIZE,
@@ -192,12 +213,12 @@ export class PESCommentaryListParser {
     let pointer = pesConfig.COMMENTARY_START_OFFSET;
 
     while (pointer + pesConfig.RECORD_SIZE <= buffer.byteLength) {
-      const commentaryName = this.readString(
+      const commentaryName = readString(
         fileBuffer,
         pointer,
         pesConfig.COMMENTARY_NAME_LENGTH,
       );
-      const playerName = this.readString(
+      const playerName = readString(
         fileBuffer,
         pointer +
           pesConfig.PLAYER_NAME_OFFSET +
@@ -214,20 +235,11 @@ export class PESCommentaryListParser {
   }
 
   /**
-   * Reads a null-terminated string from a buffer at a specific offset
-   * @param buffer - Buffer to read from
-   * @param offset - Starting position in bytes
-   * @param length - Maximum length to read in bytes
-   * @returns Cleaned string without null bytes or trailing whitespace
-   * @example
-   * const name = PESCommentaryListParser.readString(buffer, 144, 16);
-   */
-  static readString(
-    buffer: Uint8Array<ArrayBuffer>,
-    offset: number,
-    length: number,
-  ): string {
-    const bytes = buffer.slice(offset, offset + length);
-    return cleanString(bytes);
+   * Create commentary name with commentary prefix
+  */
+  private buildCommentaryName(commentaryId: number): string {
+    return `${this.pesConfig.COMMENTARY_PREFIX}${formatTo6String(
+      commentaryId,
+    )}`;
   }
 }

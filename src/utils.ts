@@ -83,3 +83,35 @@ export function sortAndCountPlayers(
 
   return { sorted, counts };
 }
+
+/**
+ * Formats a number to a 6-digit string with leading zeros
+ * Takes the last 6 digits if the number is longer than 6 digits
+ * @param num - Number to format
+ * @returns 6-character string with leading zeros
+ * @example
+ * formatTo6String(123); // "000123"
+ * formatTo6String(57123); // "057123"
+ * formatTo6String(1234567); // "234567"
+ */
+export function formatTo6String(num: number) {
+  return String(num).padStart(6, "0").slice(-6);
+}
+
+/**
+ * Reads a null-terminated string from a buffer at a specific offset
+ * @param buffer - Buffer to read from
+ * @param offset - Starting position in bytes
+ * @param length - Maximum length to read in bytes
+ * @returns Cleaned string without null bytes or trailing whitespace
+ * @example
+ * const name = PESCommentaryListParser.readString(buffer, 144, 16);
+ */
+export function readString(
+  buffer: Uint8Array<ArrayBuffer>,
+  offset: number,
+  length: number,
+): string {
+  const bytes = buffer.slice(offset, offset + length);
+  return cleanString(bytes);
+}

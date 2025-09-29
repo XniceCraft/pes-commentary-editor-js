@@ -9,6 +9,16 @@ export interface CommentaryRecord {
 }
 
 /**
+ * Represents upsert model for commentary record
+ */
+export interface CommentaryUpsert {
+  /** Commentary identifier */
+  commentaryId: number;
+  /** Display name of the player */
+  playerName: string;
+}
+
+/**
  * Binary metadata preserved from the original file
  */
 export interface CommentaryMetadata {
