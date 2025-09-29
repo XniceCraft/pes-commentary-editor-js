@@ -155,6 +155,8 @@ export class PESCommentaryListParser {
 
       pointer += this.pesConfig.RECORD_SIZE;
     });
+
+    return buffer;
   }
 
   /**
