@@ -1,4 +1,4 @@
-import type { CommentaryRecord, SortedPlayersResult } from "./types";
+import type { CommentaryRecord, SortedPlayersResult } from "./types.js";
 
 const textDecoder = new TextDecoder("utf-8");
 

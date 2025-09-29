@@ -3,9 +3,9 @@ import {
   decimalToBytes,
   isBinaryValid,
   sortAndCountPlayers,
-} from "./utils";
-import type { PESConfig } from "./parser_config";
-import type { CommentaryMetadata, CommentaryRecord } from "./types";
+} from "./utils.js";
+import type { PESConfig } from "./parser_config.js";
+import type { CommentaryMetadata, CommentaryRecord } from "./types.js";
 
 const textEncoder = new TextEncoder();
 

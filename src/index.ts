@@ -1,3 +1,3 @@
-export * from "./parser";
-export * from "./parser_config";
-export type * from "./types";
+export * from "./parser.js";
+export * from "./parser_config.js";
+export type * from "./types.js";

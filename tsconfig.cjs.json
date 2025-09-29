@@ -6,8 +6,5 @@
     "target": "es2015",
     "outDir": "./dist/cjs",
     "declaration": false,
-    "noEmit": false,
-    "sourceMap": true,
-    "esModuleInterop": true
   }
 }

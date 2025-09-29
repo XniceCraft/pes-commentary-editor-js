@@ -1,14 +1,10 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    "target": "esnext",
-    "lib": ["esnext"],
-    "types": ["node"],
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
     "module": "esnext",
     "moduleResolution": "bundler",
+    "target": "es2020",
+    "lib": ["ES2020", "DOM"],
 
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -24,12 +20,12 @@
     "jsx": "react-jsx",
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
-    "noEmit": true,
-    "allowArbitraryExtensions": true
+    "allowArbitraryExtensions": true,
+    "sourceMap": false,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": [
