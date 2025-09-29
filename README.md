@@ -12,7 +12,7 @@ A TypeScript library for editing PES (Pro Evolution Soccer) commentary files. Su
 ## Installation
 
 ```bash
-npm install pes-commentary-editor
+npm install github:XniceCraft/pes-commentary-editor-js#<tag>
 ```
 
 ## Usage
