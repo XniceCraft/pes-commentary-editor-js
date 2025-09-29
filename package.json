@@ -1,0 +1,38 @@
+{
+  "name": "pes-commentary-editor-js",
+  "version": "1.0.1",
+  "description": "",
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "clean": "rm -rf dist"
+  },
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "keywords": [
+    "Pro Evolution Soccer",
+    "PES",
+    "PES2017",
+    "PES2021"
+  ],
+  "author": "XniceCraft",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.5.2",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1"
+  }
+}
